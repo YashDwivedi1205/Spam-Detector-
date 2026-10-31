@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detector</title>
+    <meta name="Description" content="Paste an email or text message and see whether it looks like spam or not.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%89%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="site-header">
+            <svg width = "28" height = "20" viewBox="0 0 28 20" fill="none" aria-hidden="true">
+                <rect x="1" y="1" width="26" height="18" rx="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M2 3l12 9 12-9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            <span>Spam Detector</span>
+        </header>
+        <section class="intro">
+            <h1>Check a message for spam</h1>
+            <p>Paste an email or a text message. You get a verdict and the probability that it is spam.</p>
+        </section>
+
+        <main>
+            <div class="checker">
+                <form class="checker__body" id = "check-form" method="post" action="/predict">
+                    <label class="field-label" for="text">Message</label>
+
+                    <div class="examples">
+                        <span>Try an example:</span>
+                        <button type="button" class="chip" data-example="WINNER!You have won a 1000 prize. Call 09061701461 now to claim your reward!">Prize scam</button>
+                     <button type="button" class="chip" data-example="Hey, are we still meeting for lunch tomorrow at 1?">Lunch plan</button>
+            <button type="button" class="chip" data-example="Subject: cheap meds online no prescription needed click here now">Pharmacy email</button>
+          </div>
+ 
+          <textarea id="text" name="text" maxlength="10000"
+                    placeholder="Paste the message here"
+                    {% if error %}aria-invalid="true" aria-describedby="text-error"{% endif %}>{{ text or "" }}</textarea>
+ 
+          {% if error %}
+          <p class="error" id="text-error" role="alert">{{ error }}</p>
+          {% endif %}
+ 
+          <div class="actions">
+            <span class="counter" id="counter">0 / 10,000</span>
+            <button type="button" class="btn btn--quiet" id="clear-btn">Clear</button>
+            <button type="submit" class="btn btn--primary" id="submit-btn">Check message</button>
+          </div>
+        </form>
+      </div>
+ 
+      {% if result %}
+        {% set prob = result["Spam Probability"] %}
+        {% set pct = (prob * 100) | round(1) %}
+        {% if prob >= 0.7 %}
+          {% set state = "spam" %}
+          {% set title = "This looks like spam" %}
+          {% set advice = "It matches patterns that are common in spam. Don't click links or share personal details." %}
+        {% elif prob <= 0.3 %}
+          {% set state = "safe" %}
+          {% set title = "This looks safe" %}
+          {% set advice = "It doesn't match common spam patterns. Still, be careful with links you didn't expect." %}
+        {% else %}
+          {% set state = "unsure" %}
+          {% set title = "Not sure about this one" %}
+          {% set advice = "The signals are mixed. Read the message yourself before you act on it." %}
+        {% endif %}
+ 
+        <section class="verdict verdict--{{ state }}" id="result" tabindex="-1" aria-live="polite">
+          <div class="verdict__head">
+            <h2>{{ title }}</h2>
+            <span class="verdict__score">{{ pct }}% spam probability</span>
+          </div>
+          <p class="verdict__text">{{ advice }}</p>
+          <div class="meter" role="img" aria-label="Spam probability {{ pct }} percent">
+            <div class="meter__fill" style="--value: {{ pct }}%"></div>
+            <span class="meter__mark"></span>
+          </div>
+          <div class="meter__scale"><span>0%</span><span>100%</span></div>
+        </section>
+      {% endif %}
+    </main>
+ 
+    <section class="about">
+      <h2>How accurate is this?</h2>
+      <p>The checker learned from about 10,000 English emails and text messages. These results come from 2,033 messages it had never seen. It gives a probability, not a guarantee.</p>
+      <!-- Update these numbers if you retrain the model. -->
+      <dl>
+        <dt>97%</dt><dd>of all messages were labelled correctly</dd>
+        <dt>95%</dt><dd>of messages marked as spam really were spam</dd>
+        <dt>90%</dt><dd>of all spam was caught</dd>
+      </dl>
+    </section>
+ 
+  </div>
+ 
+  <script>
+    (function () {
+      var form = document.getElementById("check-form");
+      var box = document.getElementById("text");
+      var counter = document.getElementById("counter");
+      var submit = document.getElementById("submit-btn");
+      var result = document.getElementById("result");
+ 
+      function updateCount() {
+        counter.textContent = box.value.length.toLocaleString("en-US") + " / 10,000";
+      }
+ 
+      document.querySelectorAll("[data-example]").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          box.value = chip.getAttribute("data-example");
+          updateCount();
+          box.focus();
+        });
+      });
+ 
+      document.getElementById("clear-btn").addEventListener("click", function () {
+        box.value = "";
+        updateCount();
+        box.focus();
+      });
+ 
+      box.addEventListener("input", updateCount);
+ 
+      box.addEventListener("keydown", function (event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+          form.requestSubmit();
+        }
+      });
+ 
+      form.addEventListener("submit", function () {
+        submit.disabled = true;
+        submit.textContent = "Checking/u2026";
+      });
+ 
+      // Coming back with the browser's back button: reset the button.
+      window.addEventListener("pageshow", function () {
+        submit.disabled = false;
+        submit.textContent = "Check message";
+      });
+ 
+      updateCount();
+ 
+      if (result) {
+        var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        result.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "nearest" });
+        result.focus({ preventScroll: true });
+      }
+    })();
+  </script>
+</body>
+</html>

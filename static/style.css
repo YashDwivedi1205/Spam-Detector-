@@ -1,0 +1,444 @@
+/* ==========================================================
+   Spam Detector: stylesheet
+   Idea: an inspection desk. Cool paper, ink-navy text, and one
+   airmail-striped band as the single bold element.
+   Change colours in the :root block below; nothing else needs touching.
+   ========================================================== */
+
+:root {
+  --paper: #f4f6fb;
+  --surface: #ffffff;
+  --ink: #14213d;
+  --ink-soft: #4a5775;
+  --line: #d5dbea;
+
+  --air-red: #d7263d;
+  --air-blue: #1f4fbf;
+
+  --spam: #b3202f;
+  --spam-tint: #fcebed;
+  --safe: #17724b;
+  --safe-tint: #e6f5ee;
+  --unsure: #8a5a00;
+  --unsure-tint: #fdf3dc;
+
+  --btn-bg: #14213d;
+  --btn-ink: #ffffff;
+  --focus: #1f4fbf;
+
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0e1424;
+    --surface: #151d33;
+    --ink: #eaeefa;
+    --ink-soft: #a3aecb;
+    --line: #2a3556;
+
+    --spam: #ff8a95;
+    --spam-tint: #3a1b24;
+    --safe: #5ed3a0;
+    --safe-tint: #12302a;
+    --unsure: #f2c46d;
+    --unsure-tint: #35290f;
+
+    --btn-bg: #8aa9ff;
+    --btn-ink: #0e1424;
+    --focus: #8aa9ff;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 2.25rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
+.site-header svg {
+  flex: none;
+}
+
+/* ---------- Intro ---------- */
+
+.intro h1 {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.intro p {
+  margin: 0 0 1.75rem;
+  max-width: 34rem;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+
+/* ---------- Checker panel (the one bold element: airmail band) ---------- */
+
+.checker {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.checker::before {
+  content: "";
+  display: block;
+  height: 10px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--air-red) 0 16px,
+    var(--surface) 16px 24px,
+    var(--air-blue) 24px 40px,
+    var(--surface) 40px 48px
+  );
+}
+
+.checker__body {
+  padding: 1.5rem 1.5rem 1.4rem;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.chip {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--ink-soft);
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 10rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+textarea::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.8;
+}
+
+textarea[aria-invalid="true"] {
+  border-color: var(--spam);
+}
+
+.error {
+  margin: 0.6rem 0 0;
+  color: var(--spam);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.counter {
+  margin-right: auto;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn {
+  padding: 0.65rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+}
+
+.btn--primary:hover {
+  filter: brightness(1.12);
+}
+
+.btn--primary:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.btn--quiet {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.btn--quiet:hover {
+  border-color: var(--ink-soft);
+}
+
+:where(a, button, textarea, summary):focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Verdict ---------- */
+
+.verdict {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem 1.4rem;
+  border: 1px solid var(--line);
+  border-left-width: 6px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  scroll-margin-top: 1rem;
+}
+
+.verdict:focus {
+  outline: none;
+}
+
+.verdict--spam {
+  border-left-color: var(--spam);
+  background: var(--spam-tint);
+}
+
+.verdict--safe {
+  border-left-color: var(--safe);
+  background: var(--safe-tint);
+}
+
+.verdict--unsure {
+  border-left-color: var(--unsure);
+  background: var(--unsure-tint);
+}
+
+.verdict__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.verdict h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.verdict--spam h2 {
+  color: var(--spam);
+}
+
+.verdict--safe h2 {
+  color: var(--safe);
+}
+
+.verdict--unsure h2 {
+  color: var(--unsure);
+}
+
+.verdict__score {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.verdict__text {
+  margin: 0.6rem 0 1.1rem;
+  max-width: 34rem;
+}
+
+.meter {
+  position: relative;
+  height: 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+.meter__fill {
+  height: 100%;
+  width: var(--value);
+  border-radius: 999px;
+  background: var(--ink);
+  animation: fill 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.verdict--spam .meter__fill {
+  background: var(--spam);
+}
+
+.verdict--safe .meter__fill {
+  background: var(--safe);
+}
+
+.verdict--unsure .meter__fill {
+  background: var(--unsure);
+}
+
+.meter__mark {
+  position: absolute;
+  top: -0.3rem;
+  bottom: -0.3rem;
+  left: 50%;
+  width: 2px;
+  background: var(--ink);
+  opacity: 0.55;
+}
+
+.meter__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+@keyframes fill {
+  from {
+    width: 0;
+  }
+}
+
+/* ---------- About ---------- */
+
+.about {
+  margin-top: 2.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.about h2 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.about p {
+  margin: 0 0 1rem;
+  max-width: 36rem;
+  color: var(--ink-soft);
+}
+
+.about dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1.25rem;
+  margin: 0;
+  max-width: 36rem;
+}
+
+.about dt {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.about dd {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 30rem) {
+  .checker__body {
+    padding: 1.1rem 1rem;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+
+  .counter {
+    flex-basis: 100%;
+  }
+
+  .actions .btn--primary {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meter__fill {
+    animation: none;
+  }
+}
