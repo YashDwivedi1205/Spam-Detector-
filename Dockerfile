@@ -6,7 +6,7 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
 PYTHONUNBUFFERED=1 \
 NLTK_DATA=/app/nltk_data \
-PORT = 10000
+PORT=10000
 
 WORKDIR /app
 # 1. Install dependencies first. This layer is reused on later builds
