@@ -1,0 +1,35 @@
+#Git and editor files
+.Git
+.gitignore
+.ipynb_checkpoints/
+
+#Virtual environments
+spam_detector/
+venv/
+test_deploy_env/
+
+#Secrets: never put these in an image
+.env
+notes.txt
+secret_message_from_google_API/
+
+#Generated or local-only fold*ers
+__pycache__/
+*.pyc
+*.egg-info/
+artifact/
+logs/
+data/
+nltk_data/
+test_temp/
+
+# Notebooks, training-only code and dev requirements (not needed to run the app)
+notebooks/
+notebook implementation self/
+upload_data_to_db/
+*.ipynb
+requirements_dev_.txt
+
+#Docker file themselves
+Dockerfile
+.dockerignore
