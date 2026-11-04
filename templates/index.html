@@ -1,50 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spam Detector</title>
-    <meta name="Description" content="Paste an email or text message and see whether it looks like spam or not.">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%89%EF%B8%8F%3C/text%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap">
-    <link rel="stylesheet" href="static/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spam Detector</title>
+  <meta name="description" content="Paste an email or text message and see whether it looks like spam.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%89%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Public+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script>
+    /* Apply the saved theme before the page paints, so it does not flash. */
+    (function () {
+      try {
+        var saved = localStorage.getItem("theme");
+        if (saved === "light" || saved === "dark") {
+          document.documentElement.setAttribute("data-theme", saved);
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
-    <div class="page">
-        <header class="site-header">
-            <svg width = "28" height = "20" viewBox="0 0 28 20" fill="none" aria-hidden="true">
-                <rect x="1" y="1" width="26" height="18" rx="3" stroke="currentColor" stroke-width="2"/>
-                <path d="M2 3l12 9 12-9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            </svg>
-            <span>Spam Detector</span>
-        </header>
-        <section class="intro">
-            <h1>Check a message for spam</h1>
-            <p>Paste an email or a text message. You get a verdict and the probability that it is spam.</p>
-        </section>
+  <div class="page">
 
-        <main>
-            <div class="checker">
-                <form class="checker__body" id = "check-form" method="post" action="/predict">
-                    <label class="field-label" for="text">Message</label>
+    <header class="site-header">
+      <div class="brand">
+        <svg width="28" height="20" viewBox="0 0 28 20" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="26" height="18" rx="3" stroke="currentColor" stroke-width="2"/>
+          <path d="M2 3l12 9 12-9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        <span>Spam Detector</span>
+      </div>
 
-                    <div class="examples">
-                        <span>Try an example:</span>
-                        <button type="button" class="chip" data-example="WINNER!You have won a 1000 prize. Call 09061701461 now to claim your reward!">Prize scam</button>
-                     <button type="button" class="chip" data-example="Hey, are we still meeting for lunch tomorrow at 1?">Lunch plan</button>
+      <div class="tabs" role="tablist" aria-label="Sections">
+        <button type="button" class="tab" role="tab" id="tab-check" aria-controls="view-check" aria-selected="true">Check message</button>
+        <button type="button" class="tab" role="tab" id="tab-train" aria-controls="view-train" aria-selected="false">Train model</button>
+      </div>
+
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch between light and dark theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- ================= Check message ================= -->
+    <section id="view-check" role="tabpanel" aria-labelledby="tab-check">
+      <div class="intro">
+        <h1>Check a message for spam</h1>
+        <p>Paste an email or a text message. You get a verdict and the probability that it is spam.</p>
+      </div>
+
+      <div class="panel">
+        <form class="panel__body" id="check-form" method="post" action="/predict">
+          <label class="field-label" for="text">Message</label>
+
+          <div class="examples">
+            <span>Try an example:</span>
+            <button type="button" class="chip" data-example="WINNER!! You have won a 1000 prize. Call 09061701461 now to claim your reward!">Prize scam</button>
+            <button type="button" class="chip" data-example="Hey, are we still meeting for lunch tomorrow at 1?">Lunch plan</button>
             <button type="button" class="chip" data-example="Subject: cheap meds online no prescription needed click here now">Pharmacy email</button>
           </div>
- 
+
           <textarea id="text" name="text" maxlength="10000"
                     placeholder="Paste the message here"
                     {% if error %}aria-invalid="true" aria-describedby="text-error"{% endif %}>{{ text or "" }}</textarea>
- 
+
           {% if error %}
           <p class="error" id="text-error" role="alert">{{ error }}</p>
           {% endif %}
- 
+
           <div class="actions">
             <span class="counter" id="counter">0 / 10,000</span>
             <button type="button" class="btn btn--quiet" id="clear-btn">Clear</button>
@@ -52,64 +79,136 @@
           </div>
         </form>
       </div>
- 
+
       {% if result %}
         {% set prob = result["Spam Probability"] %}
         {% set pct = (prob * 100) | round(1) %}
         {% if prob >= 0.7 %}
           {% set state = "spam" %}
           {% set title = "This looks like spam" %}
+          {% set stamp = "SPAM" %}
           {% set advice = "It matches patterns that are common in spam. Don't click links or share personal details." %}
         {% elif prob <= 0.3 %}
           {% set state = "safe" %}
-          {% set title = "This looks safe" %}
-          {% set advice = "It doesn't match common spam patterns. Still, be careful with links you didn't expect." %}
+          {% set title = "No spam signs found" %}
+          {% set stamp = "NOT FLAGGED" %}
+          {% set advice = "Nothing here matches the spam patterns this checker knows. That is not a guarantee: be careful with unexpected links and requests for payment." %}
         {% else %}
           {% set state = "unsure" %}
           {% set title = "Not sure about this one" %}
+          {% set stamp = "UNSURE" %}
           {% set advice = "The signals are mixed. Read the message yourself before you act on it." %}
         {% endif %}
- 
+
         <section class="verdict verdict--{{ state }}" id="result" tabindex="-1" aria-live="polite">
-          <div class="verdict__head">
+          <div class="verdict__main">
             <h2>{{ title }}</h2>
-            <span class="verdict__score">{{ pct }}% spam probability</span>
+            <p class="verdict__score">{{ pct }}% spam probability</p>
+            <p class="verdict__text">{{ advice }}</p>
           </div>
-          <p class="verdict__text">{{ advice }}</p>
-          <div class="meter" role="img" aria-label="Spam probability {{ pct }} percent">
-            <div class="meter__fill" style="--value: {{ pct }}%"></div>
-            <span class="meter__mark"></span>
+          <div class="stamp" aria-hidden="true">{{ stamp }}</div>
+          <div class="verdict__meter">
+            <div class="meter" role="img" aria-label="Spam probability {{ pct }} percent">
+              <div class="meter__fill" style="--value: {{ pct }}%"></div>
+              <span class="meter__mark"></span>
+            </div>
+            <div class="meter__scale"><span>0%</span><span>100%</span></div>
+            <p class="verdict__note">This checker learned from older emails and text messages, so it can miss newer scams.</p>
           </div>
-          <div class="meter__scale"><span>0%</span><span>100%</span></div>
         </section>
       {% endif %}
-    </main>
- 
-    <section class="about">
-      <h2>How accurate is this?</h2>
-      <p>The checker learned from about 10,000 English emails and text messages. These results come from 2,033 messages it had never seen. It gives a probability, not a guarantee.</p>
-      <!-- Update these numbers if you retrain the model. -->
-      <dl>
-        <dt>97%</dt><dd>of all messages were labelled correctly</dd>
-        <dt>95%</dt><dd>of messages marked as spam really were spam</dd>
-        <dt>90%</dt><dd>of all spam was caught</dd>
-      </dl>
+
+      <section class="about">
+        <h2>How accurate is this?</h2>
+        <p>The checker learned from about 10,000 older English emails and text messages. The results below come from 2,033 messages it had never seen. It can miss newer scams, such as delivery-fee or job-offer messages, and it gives a probability, not a guarantee.</p>
+        <!-- Update these numbers if you retrain the model. -->
+        <dl>
+          <dt>97%</dt><dd>of all messages were labelled correctly</dd>
+          <dt>95%</dt><dd>of messages marked as spam really were spam</dd>
+          <dt>90%</dt><dd>of all spam was caught</dd>
+        </dl>
+      </section>
     </section>
- 
+
+    <!-- ================= Train model ================= -->
+    <section id="view-train" role="tabpanel" aria-labelledby="tab-train" hidden>
+      <div class="intro">
+        <h1>Train the model</h1>
+        <p>Training reads the labelled messages from MongoDB, learns from 80% of them and tests on the other 20%. It runs in the background, so you can keep checking messages while it works.</p>
+      </div>
+
+      <div class="panel">
+        <div class="panel__body" id="train-panel" data-enabled="{{ 'true' if training_enabled else 'false' }}">
+          <div class="status" id="train-status" data-state="idle" aria-live="polite">
+            <span class="status__dot" aria-hidden="true"></span>
+            <span class="status__label" id="train-label">{{ 'Ready to train' if training_enabled else 'Training is turned off on this server' }}</span>
+            <span class="status__time" id="train-time"></span>
+            <button type="button" class="btn btn--primary" id="train-btn" {% if not training_enabled %}disabled{% endif %}>Start training</button>
+          </div>
+
+          <div class="busy" id="train-busy" hidden></div>
+
+          <p class="train-note" id="train-off" {% if training_enabled %}hidden{% endif %}>This server only answers prediction requests. To retrain, run the app on your own computer with ENABLE_TRAINING set to 1.</p>
+
+          <p class="train-error" id="train-error" role="alert" hidden></p>
+
+          <div id="train-done" hidden>
+            <dl class="results">
+              <dt>Accuracy on new messages</dt><dd id="r-acc"></dd>
+              <dt>Spam precision</dt><dd id="r-prec"></dd>
+              <dt>Spam recall</dt><dd id="r-rec"></dd>
+              <dt>Accuracy during tuning</dt><dd id="r-train"></dd>
+              <dt>Saved model</dt><dd id="r-path"></dd>
+            </dl>
+            <p class="train-note">The new model is saved but not live yet. To use it, copy it to saved_models/model.pkl and restart the app.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">Spam Detector, built with FastAPI and scikit-learn.</footer>
   </div>
- 
+
   <script>
     (function () {
+      /* ---------- Tabs ---------- */
+      var tabs = { check: document.getElementById("tab-check"), train: document.getElementById("tab-train") };
+      var views = { check: document.getElementById("view-check"), train: document.getElementById("view-train") };
+
+      function showTab(name) {
+        Object.keys(tabs).forEach(function (key) {
+          var on = key === name;
+          tabs[key].setAttribute("aria-selected", on ? "true" : "false");
+          views[key].hidden = !on;
+        });
+        if (name === "train") { refreshTraining(); }
+      }
+      tabs.check.addEventListener("click", function () { showTab("check"); history.replaceState(null, "", location.pathname); });
+      tabs.train.addEventListener("click", function () { showTab("train"); history.replaceState(null, "", "#train"); });
+
+      /* ---------- Theme ---------- */
+      document.getElementById("theme-toggle").addEventListener("click", function () {
+        var root = document.documentElement;
+        var current = root.getAttribute("data-theme");
+        if (!current) {
+          current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        var next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("theme", next); } catch (e) {}
+      });
+
+      /* ---------- Check form ---------- */
       var form = document.getElementById("check-form");
       var box = document.getElementById("text");
       var counter = document.getElementById("counter");
       var submit = document.getElementById("submit-btn");
       var result = document.getElementById("result");
- 
+
       function updateCount() {
         counter.textContent = box.value.length.toLocaleString("en-US") + " / 10,000";
       }
- 
+
       document.querySelectorAll("[data-example]").forEach(function (chip) {
         chip.addEventListener("click", function () {
           box.value = chip.getAttribute("data-example");
@@ -117,39 +216,113 @@
           box.focus();
         });
       });
- 
+
       document.getElementById("clear-btn").addEventListener("click", function () {
         box.value = "";
         updateCount();
         box.focus();
       });
- 
+
       box.addEventListener("input", updateCount);
- 
+
       box.addEventListener("keydown", function (event) {
-        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-          form.requestSubmit();
-        }
+        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { form.requestSubmit(); }
       });
- 
+
       form.addEventListener("submit", function () {
         submit.disabled = true;
-        submit.textContent = "Checking/u2026";
+        submit.textContent = "Checking\u2026";
       });
- 
-      // Coming back with the browser's back button: reset the button.
+
       window.addEventListener("pageshow", function () {
         submit.disabled = false;
         submit.textContent = "Check message";
       });
- 
+
       updateCount();
- 
+
       if (result) {
         var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         result.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "nearest" });
         result.focus({ preventScroll: true });
       }
+
+      /* ---------- Training ---------- */
+      var panel = document.getElementById("train-panel");
+      var statusBox = document.getElementById("train-status");
+      var label = document.getElementById("train-label");
+      var timeEl = document.getElementById("train-time");
+      var trainBtn = document.getElementById("train-btn");
+      var busy = document.getElementById("train-busy");
+      var off = document.getElementById("train-off");
+      var errorEl = document.getElementById("train-error");
+      var done = document.getElementById("train-done");
+      var timer = null;
+
+      function clock(seconds) {
+        var m = Math.floor(seconds / 60), s = Math.floor(seconds % 60);
+        return m + ":" + (s < 10 ? "0" : "") + s;
+      }
+
+      function pct(value) {
+        return (value * 100).toFixed(1) + "%";
+      }
+
+      function render(s) {
+        var state = s.enabled ? s.status : "idle";
+        statusBox.setAttribute("data-state", state);
+        busy.hidden = state !== "running";
+        done.hidden = true;
+        errorEl.hidden = true;
+        off.hidden = s.enabled;
+        trainBtn.disabled = !s.enabled || state === "running";
+        timeEl.textContent = s.elapsed_seconds != null && state !== "idle" ? clock(s.elapsed_seconds) : "";
+
+        if (!s.enabled) {
+          label.textContent = "Training is turned off on this server";
+        } else if (state === "running") {
+          label.textContent = "Training in the background";
+        } else if (state === "done") {
+          label.textContent = "Training finished";
+          done.hidden = false;
+          var m = s.metrics;
+          document.getElementById("r-acc").textContent = m ? pct(m.test_accuracy) : "See the log file";
+          document.getElementById("r-prec").textContent = m ? pct(m.test_precision) : "See the log file";
+          document.getElementById("r-rec").textContent = m ? pct(m.test_recall) : "See the log file";
+          document.getElementById("r-train").textContent = m ? pct(m.train_accuracy) : "See the log file";
+          document.getElementById("r-path").textContent = s.model_path || "See the artifact folder";
+        } else if (state === "failed") {
+          label.textContent = "Training failed";
+          errorEl.hidden = false;
+          errorEl.textContent = s.error || "Something went wrong. Check the log file for details.";
+        } else {
+          label.textContent = "Ready to train";
+        }
+        trainBtn.textContent = state === "done" || state === "failed" ? "Train again" : "Start training";
+
+        if (state === "running" && !timer) {
+          timer = setInterval(refreshTraining, 2000);
+        } else if (state !== "running" && timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function refreshTraining() {
+        fetch("/train/status", { headers: { "Accept": "application/json" } })
+          .then(function (r) { return r.json(); })
+          .then(render)
+          .catch(function () {});
+      }
+
+      trainBtn.addEventListener("click", function () {
+        trainBtn.disabled = true;
+        fetch("/train/start", { method: "POST" })
+          .then(function () { refreshTraining(); })
+          .catch(function () { refreshTraining(); });
+      });
+
+      if (location.hash === "#train") { showTab("train"); }
     })();
   </script>
 </body>

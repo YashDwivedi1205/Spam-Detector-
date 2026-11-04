@@ -1,8 +1,9 @@
 /* ==========================================================
-   Spam Detector: stylesheet
-   Idea: an inspection desk. Cool paper, ink-navy text, and one
-   airmail-striped band as the single bold element.
-   Change colours in the :root block below; nothing else needs touching.
+   Spam Detector: stylesheet (v2)
+   An inspection desk: cool paper, ink-navy text, one airmail band,
+   and a rubber stamp that lands on the verdict.
+   Colours live in the token blocks below. Light is the default,
+   dark follows the system or the toggle in the header.
    ========================================================== */
 
 :root {
@@ -31,8 +32,27 @@
   --radius: 8px;
 }
 
+:root[data-theme="dark"] {
+  --paper: #0e1424;
+  --surface: #151d33;
+  --ink: #eaeefa;
+  --ink-soft: #a3aecb;
+  --line: #2a3556;
+
+  --spam: #ff8a95;
+  --spam-tint: #3a1b24;
+  --safe: #5ed3a0;
+  --safe-tint: #12302a;
+  --unsure: #f2c46d;
+  --unsure-tint: #35290f;
+
+  --btn-bg: #8aa9ff;
+  --btn-ink: #0e1424;
+  --focus: #8aa9ff;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --paper: #0e1424;
     --surface: #151d33;
     --ink: #eaeefa;
@@ -71,27 +91,78 @@ body {
   line-height: 1.6;
 }
 
-.page {
-  max-width: 44rem;
-  margin: 0 auto;
-  padding: 2rem 1.25rem 4rem;
+[hidden] {
+  display: none !important;
 }
 
-/* ---------- Header ---------- */
+.page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+/* ---------- Header and tabs ---------- */
 
 .site-header {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 2.25rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin-bottom: 2.25rem;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.15rem;
   letter-spacing: -0.01em;
 }
 
-.site-header svg {
-  flex: none;
+.tabs {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.tab {
+  padding: 0.35rem 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tab[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-left: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  border-color: var(--ink-soft);
 }
 
 /* ---------- Intro ---------- */
@@ -108,21 +179,21 @@ body {
 
 .intro p {
   margin: 0 0 1.75rem;
-  max-width: 34rem;
+  max-width: 36rem;
   color: var(--ink-soft);
   font-size: 1.05rem;
 }
 
-/* ---------- Checker panel (the one bold element: airmail band) ---------- */
+/* ---------- Panel with the airmail band ---------- */
 
-.checker {
+.panel {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
 }
 
-.checker::before {
+.panel::before {
   content: "";
   display: block;
   height: 10px;
@@ -135,7 +206,7 @@ body {
   );
 }
 
-.checker__body {
+.panel__body {
   padding: 1.5rem 1.5rem 1.4rem;
 }
 
@@ -233,8 +304,8 @@ textarea[aria-invalid="true"] {
 }
 
 .btn--primary:disabled {
-  opacity: 0.65;
-  cursor: progress;
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .btn--quiet {
@@ -255,6 +326,9 @@ textarea[aria-invalid="true"] {
 /* ---------- Verdict ---------- */
 
 .verdict {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem 1.5rem;
   margin-top: 1.5rem;
   padding: 1.25rem 1.5rem 1.4rem;
   border: 1px solid var(--line);
@@ -271,28 +345,33 @@ textarea[aria-invalid="true"] {
 .verdict--spam {
   border-left-color: var(--spam);
   background: var(--spam-tint);
+  --state: var(--spam);
 }
 
 .verdict--safe {
   border-left-color: var(--safe);
   background: var(--safe-tint);
+  --state: var(--safe);
 }
 
 .verdict--unsure {
   border-left-color: var(--unsure);
   background: var(--unsure-tint);
+  --state: var(--unsure);
 }
 
-.verdict__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.25rem 1rem;
+.verdict__main,
+.verdict__meter {
+  color: var(--ink);
+}
+
+.verdict__main {
+  grid-column: 1;
 }
 
 .verdict h2 {
   margin: 0;
+  color: var(--state);
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(1.6rem, 5vw, 2.1rem);
@@ -301,19 +380,8 @@ textarea[aria-invalid="true"] {
   text-wrap: balance;
 }
 
-.verdict--spam h2 {
-  color: var(--spam);
-}
-
-.verdict--safe h2 {
-  color: var(--safe);
-}
-
-.verdict--unsure h2 {
-  color: var(--unsure);
-}
-
 .verdict__score {
+  margin: 0.35rem 0 0;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.15rem;
@@ -321,8 +389,34 @@ textarea[aria-invalid="true"] {
 }
 
 .verdict__text {
-  margin: 0.6rem 0 1.1rem;
+  margin: 0.6rem 0 0;
   max-width: 34rem;
+}
+
+.stamp {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  padding: 0.35rem 0.9rem 0.3rem;
+  border: 3px solid var(--state);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 5px var(--state);
+  color: var(--state);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0.92;
+  transform: rotate(-6deg);
+  animation: stamp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.verdict__meter {
+  grid-column: 1 / -1;
+  margin-top: 0.9rem;
 }
 
 .meter {
@@ -336,20 +430,8 @@ textarea[aria-invalid="true"] {
   height: 100%;
   width: var(--value);
   border-radius: 999px;
-  background: var(--ink);
-  animation: fill 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-.verdict--spam .meter__fill {
-  background: var(--spam);
-}
-
-.verdict--safe .meter__fill {
-  background: var(--safe);
-}
-
-.verdict--unsure .meter__fill {
-  background: var(--unsure);
+  background: var(--state);
+  animation: fill 0.9s 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .meter__mark {
@@ -370,10 +452,122 @@ textarea[aria-invalid="true"] {
   font-size: 0.85rem;
 }
 
+.verdict__note {
+  margin: 0.8rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-16deg) scale(1.8);
+  }
+  to {
+    opacity: 0.92;
+    transform: rotate(-6deg) scale(1);
+  }
+}
+
 @keyframes fill {
   from {
     width: 0;
   }
+}
+
+/* ---------- Training view ---------- */
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.status__dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--ink-soft);
+}
+
+.status[data-state="running"] .status__dot {
+  background: var(--unsure);
+}
+
+.status[data-state="done"] .status__dot {
+  background: var(--safe);
+}
+
+.status[data-state="failed"] .status__dot {
+  background: var(--spam);
+}
+
+.status__label {
+  font-weight: 600;
+}
+
+.status__time {
+  margin-right: auto;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.busy {
+  height: 0.5rem;
+  margin-top: 1rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
+  overflow: hidden;
+}
+
+.busy::after {
+  content: "";
+  display: block;
+  width: 35%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--unsure);
+  animation: slide 1.3s ease-in-out infinite alternate;
+}
+
+@keyframes slide {
+  from {
+    margin-left: 0;
+  }
+  to {
+    margin-left: 65%;
+  }
+}
+
+.train-note {
+  margin: 1rem 0 0;
+  color: var(--ink-soft);
+}
+
+.train-error {
+  margin: 1rem 0 0;
+  color: var(--spam);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1.5rem;
+  margin: 1.1rem 0 0;
+}
+
+.results dt {
+  color: var(--ink-soft);
+}
+
+.results dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- About ---------- */
@@ -417,10 +611,16 @@ textarea[aria-invalid="true"] {
   color: var(--ink-soft);
 }
 
+.site-footer {
+  margin-top: 3rem;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
 /* ---------- Small screens ---------- */
 
-@media (max-width: 30rem) {
-  .checker__body {
+@media (max-width: 34rem) {
+  .panel__body {
     padding: 1.1rem 1rem;
   }
 
@@ -435,10 +635,23 @@ textarea[aria-invalid="true"] {
   .actions .btn--primary {
     flex: 1;
   }
+
+  .verdict {
+    grid-template-columns: 1fr;
+  }
+
+  .stamp {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    margin: 0.2rem 0 0.4rem 0.3rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .meter__fill {
+  .stamp,
+  .meter__fill,
+  .busy::after {
     animation: none;
   }
 }
